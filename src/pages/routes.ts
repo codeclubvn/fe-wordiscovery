@@ -12,7 +12,7 @@ import { kRoute } from "../utils";
 
 export default [
     {
-        path: "/play",
+        path: "/",
         component: Play,
         name: kRoute.Play
     },
