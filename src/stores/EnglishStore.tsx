@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction, reaction } from "mobx"
+import { makeAutoObservable } from "mobx"
 import words from 'an-array-of-english-words';
 
 class EnglishStore {
