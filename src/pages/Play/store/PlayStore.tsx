@@ -5,6 +5,12 @@ import { createContext } from "react";
 
 export enum EStatus { Menu, Playing, GameOver }
 export enum EError { None, NotValidWord, TimeOut, Duplicated, WrongRule }
+export enum EObject { Player, App }
+
+export interface GameWord {
+    word: string,
+    createdBy: EObject
+}
 
 const MAX_TURN_NUMBER = 3
 const MAX_TIME = 10
@@ -15,7 +21,6 @@ const errors = {
     [EError.TimeOut]: 'hết giờ',
     [EError.Duplicated]: 'từ trùng',
     [EError.WrongRule]: 'sai luật',
-
 }
 
 export class PlayStore {
@@ -32,6 +37,7 @@ export class PlayStore {
     currentAnswer: string = ''
     previousAnswers: string[] = []
     turns: number = MAX_TURN_NUMBER
+    gameProgress: GameWord[] = []
 
     get percentage() {
         return this.timeLeft / MAX_TIME * 100
@@ -52,6 +58,10 @@ export class PlayStore {
     getRandomWord = () => {
         var word = capitalizeFirstLetter(words[Math.floor(Math.random() * words.length)])
         this.currentWord = word
+        this.gameProgress.push({
+            word: this.currentWord,
+            createdBy: EObject.App
+        } as GameWord)
     }
 
     clearInterval = () => clearInterval(this.refreshIntervalId)
@@ -90,6 +100,10 @@ export class PlayStore {
     }
 
     onRightAnswer = () => {
+        this.gameProgress.push({
+            word: this.currentAnswer,
+            createdBy: EObject.Player
+        } as GameWord)
         this.previousAnswers.push(this.currentAnswer)
         this.score++
         this.getRandomWord()
