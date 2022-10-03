@@ -2,6 +2,8 @@ import { makeAutoObservable, autorun } from "mobx"
 import words from 'an-array-of-english-words';
 import { capitalizeFirstLetter } from "../../../utils";
 import { createContext } from "react";
+import { historyRepo } from "../../../repositories";
+import { IHistory } from "../../../models";
 
 export enum EStatus { Menu, Playing, GameOver }
 export enum EError { None, NotValidWord, TimeOut, Duplicated, WrongRule }
@@ -38,6 +40,7 @@ export class PlayStore {
     previousAnswers: string[] = []
     turns: number = MAX_TURN_NUMBER
     gameProgress: GameWord[] = []
+    history: IHistory[] = []
 
     get percentage() {
         return this.timeLeft / MAX_TIME * 100
@@ -69,9 +72,24 @@ export class PlayStore {
     countDown = () => this.timeLeft = this.timeLeft - 1
 
     onGameOver = (errorStatus: EError) => {
+        this.addHistory()
+
         this.errorStatus = errorStatus
         this.status = EStatus.GameOver
         this.clearInterval()
+    }
+
+    addHistory = () =>{
+        const history : IHistory = {
+            score: this.score,
+            createdAt: Date.now(),
+            gameProgress: this.gameProgress
+        }
+        historyRepo.addHistory(history)
+    }
+
+    getHistory = () => {
+        return historyRepo.getHistory()
     }
 
     checkValidWord = () => {
@@ -123,6 +141,7 @@ export class PlayStore {
         this.currentWord = ''
         this.currentAnswer = ''
         this.previousAnswers = []
+        this.gameProgress = []
         this.score = 0
         this.timeLeft = MAX_TIME
         this.errorStatus = EError.None
